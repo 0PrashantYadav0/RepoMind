@@ -25,16 +25,30 @@ _MENTION_RE = re.compile(r"@([A-Za-z0-9-]+)")
 class GitHubSource:
     name = "github"
 
-    def __init__(self, gh_repo, repo_name: str) -> None:
+    def __init__(
+        self,
+        gh_repo,
+        repo_name: str,
+        max_prs: int | None = None,
+        max_issues: int | None = None,
+    ) -> None:
         self._repo = gh_repo
         self.repo_name = repo_name
+        self.max_prs = max_prs
+        self.max_issues = max_issues
 
     @classmethod
-    def from_token(cls, token: str, repo_name: str) -> "GitHubSource":
+    def from_token(
+        cls,
+        token: str,
+        repo_name: str,
+        max_prs: int | None = None,
+        max_issues: int | None = None,
+    ) -> "GitHubSource":
         from github import Github  # lazy: PyGithub only needed for the real path
 
         gh = Github(token)
-        return cls(gh.get_repo(repo_name), repo_name)
+        return cls(gh.get_repo(repo_name), repo_name, max_prs, max_issues)
 
     def fetch(self, since: str | None = None) -> Iterable[Document]:
         yield from self._fetch_pulls()
@@ -42,7 +56,11 @@ class GitHubSource:
 
     # -- pull requests -------------------------------------------------------
     def _fetch_pulls(self) -> Iterable[Document]:
+        count = 0
         for pr in self._repo.get_pulls(state="all"):
+            if self.max_prs and count >= self.max_prs:
+                break
+            count += 1
             body = pr.body or ""
             author = getattr(getattr(pr, "user", None), "login", None)
             refs: list[Reference] = []
@@ -79,10 +97,14 @@ class GitHubSource:
 
     # -- issues --------------------------------------------------------------
     def _fetch_issues(self) -> Iterable[Document]:
+        count = 0
         for issue in self._repo.get_issues(state="all"):
+            if self.max_issues and count >= self.max_issues:
+                break
             # PyGithub returns PRs as issues too; skip those (we ingest PRs above).
             if getattr(issue, "pull_request", None):
                 continue
+            count += 1
             body = issue.body or ""
             author = getattr(getattr(issue, "user", None), "login", None)
             refs: list[Reference] = []

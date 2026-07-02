@@ -17,6 +17,8 @@ class IngestConfig(BaseModel):
     max_retries: int = 5
     retry_backoff: str = "exponential"
     max_commits: int = 0  # 0 = unlimited; cap git history walked per backfill/sync
+    max_prs: int = 0      # 0 = unlimited; cap pull requests fetched from GitHub
+    max_issues: int = 0   # 0 = unlimited; cap issues fetched from GitHub
 
 
 class WebhookConfig(BaseModel):

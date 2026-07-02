@@ -64,7 +64,12 @@ class Engine:
             return None
         from repomind.sources.github_source import GitHubSource
 
-        return GitHubSource.from_token(token, self.config.repo.name)
+        return GitHubSource.from_token(
+            token,
+            self.config.repo.name,
+            max_prs=self.config.ingest.max_prs or None,
+            max_issues=self.config.ingest.max_issues or None,
+        )
 
     # -- ingestion -----------------------------------------------------------
     def backfill_git(self, since: str | None = None) -> int:
