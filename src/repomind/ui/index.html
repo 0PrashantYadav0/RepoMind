@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RepoMind &middot; Give your repository a brain</title>
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%A7%A0%3C/text%3E%3C/svg%3E" />
+  <script src="https://unpkg.com/force-graph@1.43.5/dist/force-graph.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- Top bar -------------------------------------------------------------->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <div class="brand-text">
+        <strong>RepoMind</strong>
+        <span class="brand-sub">Give your repository a brain</span>
+      </div>
+    </div>
+
+    <div class="conn">
+      <span id="statusDot" class="dot dot-idle" title="Not connected"></span>
+      <span id="statusText" class="conn-text">Not connected</span>
+    </div>
+
+    <div class="keybox">
+      <input id="apiKey" type="password" placeholder="Paste your API key (X-API-Key)" autocomplete="off" spellcheck="false" />
+      <button id="connectBtn" class="btn btn-primary">Connect</button>
+      <button id="clearKeyBtn" class="btn btn-ghost" title="Forget key"></button>
+    </div>
+  </header>
+
+  <!-- Tabs ---------------------------------------------------------------->
+  <nav class="tabs">
+    <button class="tab tab-active" data-tab="ask">Ask</button>
+    <button class="tab" data-tab="graph">Graph Explorer</button>
+    <button class="tab" data-tab="ingest">Ingest</button>
+    <button class="tab" data-tab="admin">Admin</button>
+    <button class="tab" data-tab="about">About</button>
+    <div class="tabs-spacer"></div>
+    <div class="counts" id="countsBar"></div>
+  </nav>
+
+  <main class="container">
+    <!-- ASK ------------------------------------------------------------->
+    <section class="panel" id="tab-ask">
+      <div class="ask-hero">
+        <h1>Ask your codebase anything</h1>
+        <p class="muted">Answers come from multi-hop graph traversal &mdash; commits, PRs, issues, people, decisions and chat &mdash; not just keyword search.</p>
+        <div class="ask-row">
+          <input id="question" class="ask-input" placeholder="e.g. Why was the auth layer changed and who reviewed it?" />
+          <button id="askBtn" class="btn btn-primary btn-lg">Ask</button>
+        </div>
+        <div class="chips" id="exampleChips">
+          <button class="chip" data-q="Who fixed the login bug and who wrote it?">Who fixed the login bug?</button>
+          <button class="chip" data-q="What does auth.py do and what changed it?">What changed auth.py?</button>
+          <button class="chip" data-q="Which commits closed an issue?">Commits that closed issues</button>
+        </div>
+      </div>
+
+      <div id="askResult" class="result hidden">
+        <div class="answer-card">
+          <div class="answer-head">
+            <span class="badge" id="answerBadge">Answer</span>
+            <span class="muted" id="answerQuestion"></span>
+          </div>
+          <p class="answer-text" id="answerText"></p>
+          <div class="facts" id="answerFacts"></div>
+        </div>
+        <div class="subgraph-card">
+          <div class="card-head">
+            <span>Traversal path</span>
+            <span class="muted small" id="subgraphMeta"></span>
+          </div>
+          <div id="subgraph" class="graph-canvas small"></div>
+          <div class="legend" id="legendAsk"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GRAPH EXPLORER -------------------------------------------------->
+    <section class="panel hidden" id="tab-graph">
+      <div class="toolbar">
+        <button id="loadGraphBtn" class="btn btn-primary">Load graph</button>
+        <span class="muted small" id="graphMeta"></span>
+        <div class="toolbar-spacer"></div>
+        <label class="check"><input type="checkbox" id="showDeleted" /> show tombstoned</label>
+      </div>
+      <div id="fullGraph" class="graph-canvas large"></div>
+      <div class="legend" id="legendFull"></div>
+    </section>
+
+    <!-- INGEST ---------------------------------------------------------->
+    <section class="panel hidden" id="tab-ingest">
+      <div class="card">
+        <h2>Ingest a chat message</h2>
+        <p class="muted">The low-code / live path (<code>write</code> scope). References like <code>#123</code> become <code>discussed-in</code> edges to issues/PRs.</p>
+        <div class="form">
+          <label>Message ID <input id="msgId" placeholder="e.g. 1024" /></label>
+          <label>Author <input id="msgAuthor" placeholder="e.g. ada" /></label>
+          <label>Channel <input id="msgChannel" placeholder="e.g. dev" /></label>
+          <label class="wide">Text <textarea id="msgText" rows="3" placeholder="We decided X in #12 ..."></textarea></label>
+        </div>
+        <button id="ingestBtn" class="btn btn-primary">Ingest message</button>
+      </div>
+      <div class="card">
+        <h3>Webhook &amp; backfill</h3>
+        <p class="muted small">Bulk ingestion (git history, GitHub PRs/issues, Discord exports) runs from the CLI: <code>repomind backfill</code>. Live GitHub events arrive at <code>POST /webhook</code> (HMAC-verified).</p>
+      </div>
+    </section>
+
+    <!-- ADMIN ----------------------------------------------------------->
+    <section class="panel hidden" id="tab-admin">
+      <div class="card">
+        <h2>Sync &amp; verify <span class="badge badge-write">write</span></h2>
+        <p class="muted">Force a re-sync against the source of truth. A full sync reconciles (tombstones what vanished upstream).</p>
+        <div class="toolbar">
+          <select id="syncScope" class="select">
+            <option value="all">all</option>
+            <option value="commits">commits</option>
+            <option value="prs">prs</option>
+            <option value="issues">issues</option>
+          </select>
+          <label class="check"><input type="checkbox" id="syncFull" /> full reconcile</label>
+          <button id="syncBtn" class="btn btn-primary">Sync</button>
+          <button id="verifyBtn" class="btn">Verify</button>
+        </div>
+      </div>
+      <div class="card danger">
+        <h2>Forget <span class="badge badge-admin">admin</span></h2>
+        <p class="muted">Hard-erase a node by stable ID (privacy / leaked secret / junk). This is irreversible &mdash; normal deletions are tombstoned automatically.</p>
+        <div class="toolbar">
+          <input id="forgetTarget" class="ask-input" placeholder="e.g. git:file:demo/repo:secret.py" />
+          <button id="forgetBtn" class="btn btn-danger">Forget</button>
+        </div>
+      </div>
+      <pre id="adminOut" class="output hidden"></pre>
+    </section>
+
+    <!-- ABOUT ----------------------------------------------------------->
+    <section class="panel hidden" id="tab-about">
+      <div class="card about">
+        <h2>What is RepoMind?</h2>
+        <p>RepoMind turns a repository into a typed <strong>knowledge graph</strong> &mdash; commits, pull requests, issues, people, decisions and chat &mdash; and answers questions by walking the relationships between them. Memory is powered by <a href="https://github.com/topoteretes/cognee" target="_blank" rel="noreferrer">Cognee</a>'s hybrid graph + vector layer.</p>
+        <div class="about-grid">
+          <div><span class="dot" style="background:#a371f7"></span> Commit</div>
+          <div><span class="dot" style="background:#3fb950"></span> File</div>
+          <div><span class="dot" style="background:#2f81f7"></span> PullRequest</div>
+          <div><span class="dot" style="background:#db6d28"></span> Issue</div>
+          <div><span class="dot" style="background:#f778ba"></span> Person</div>
+          <div><span class="dot" style="background:#56d364"></span> Message</div>
+        </div>
+        <h3>Security</h3>
+        <p class="muted">Every endpoint requires an API key (scopes: <code>read</code> &lt; <code>write</code> &lt; <code>admin</code>) with per-key rate limiting. Your key is stored only in this browser's localStorage and sent as <code>X-API-Key</code>.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast --------------------------------------------------------------->
+  <div id="toast" class="toast hidden"></div>
+</body>
+</html>
