@@ -195,6 +195,16 @@ def create_app(engine: Engine | None = None) -> FastAPI:
     # Serve the static web UI (unauthenticated assets; all data calls still need
     # an API key). Root redirects to the UI.
     if UI_DIR.is_dir():
+        @app.middleware("http")
+        async def _no_cache_ui(request: Request, call_next):
+            # The UI assets change between deploys; force the browser to always
+            # revalidate so a stale app.js/styles.css can never be served.
+            response = await call_next(request)
+            path = request.url.path
+            if path == "/" or path.startswith("/ui"):
+                response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            return response
+
         @app.get("/")
         def root() -> RedirectResponse:
             return RedirectResponse(url="/ui/")
