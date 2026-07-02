@@ -152,6 +152,7 @@ async function ask() {
   if (!q) { toast("Type a question", "err"); return; }
   try {
     const r = await api("/ask", { method: "POST", body: { question: q } });
+    $("question").value = "";  // clear the box after a successful ask
     $("askResult").classList.remove("hidden");
     $("answerQuestion").textContent = r.question;
     $("answerText").textContent = r.answer;
