@@ -155,9 +155,14 @@ async function ask() {
     $("question").value = "";  // clear the box after a successful ask
     $("askResult").classList.remove("hidden");
     $("answerQuestion").textContent = r.question;
-    $("answerText").textContent = r.answer;
-    $("answerFacts").innerHTML = (r.facts || [])
-      .map((f) => `<div class="fact">${escapeHtml(f)}</div>`)
+    $("answerText").innerHTML = formatAnswer(r.answer || "");
+    renderSeeds(r.seeds || []);
+    const facts = r.facts || [];
+    $("factsHead").innerHTML = facts.length
+      ? `<span class="facts-title">Traversal &mdash; ${facts.length} hop${facts.length > 1 ? "s" : ""}</span>`
+      : "";
+    $("answerFacts").innerHTML = facts
+      .map((f, i) => `<div class="fact"><span class="fact-num">${i + 1}</span><span class="fact-text">${formatAnswer(f)}</span></div>`)
       .join("");
     const sg = r.subgraph || { nodes: [], edges: [] };
     $("subgraphMeta").textContent = `${sg.nodes.length} nodes / ${sg.edges.length} edges`;
@@ -251,6 +256,67 @@ function escapeHtml(s) {
   return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
+// Highlight node-type keywords and 'quoted titles' in answer/fact text so the
+// report reads as structured entities rather than a wall of prose.
+function formatAnswer(text) {
+  let s = escapeHtml(text || "");
+  s = s.replace(/'([^']+)'/g, '<span class="ent-title">$1</span>');
+  const types = Object.keys(TYPE_COLORS).sort((a, b) => b.length - a.length);
+  const re = new RegExp("\\b(" + types.join("|") + ")\\b", "g");
+  s = s.replace(re, (m) => `<span class="ent" style="--ent:${colorFor(m)}">${m}</span>`);
+  return s;
+}
+
+// Render the seed nodes the answer is grounded on as colored chips.
+function renderSeeds(seeds) {
+  const el = $("answerSeeds");
+  if (!seeds.length) { el.innerHTML = ""; return; }
+  el.innerHTML =
+    '<span class="seeds-label">Grounded on</span>' +
+    seeds
+      .slice(0, 8)
+      .map((s) => {
+        const title = (s.title || s.id || "").slice(0, 42);
+        return `<span class="seed-chip" title="${escapeHtml(s.id || "")}"><span class="dot" style="background:${colorFor(s.type)}"></span>${escapeHtml(title)}</span>`;
+      })
+      .join("");
+}
+
+// ---- graph controls (zoom / fit / fullscreen) -----------------------------
+const graphByName = (name) => (name === "ask" ? askGraph : fullGraph);
+const wrapByName = (name) => (name === "ask" ? $("subgraphWrap") : $("fullGraphWrap"));
+const canvasByName = (name) => (name === "ask" ? $("subgraph") : $("fullGraph"));
+
+function graphAction(name, act) {
+  const g = graphByName(name);
+  if (!g) { toast("Load a graph first", "err"); return; }
+  if (act === "in") g.zoom(g.zoom() * 1.4, 250);
+  else if (act === "out") g.zoom(g.zoom() / 1.4, 250);
+  else if (act === "fit") g.zoomToFit(400, 40);
+  else if (act === "full") toggleFullscreen(name);
+}
+
+function toggleFullscreen(name) {
+  const wrap = wrapByName(name);
+  if (!document.fullscreenElement) {
+    (wrap.requestFullscreen || wrap.webkitRequestFullscreen)?.call(wrap);
+  } else {
+    (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+  }
+}
+
+// Keep the active graph sized to its container on fullscreen enter/exit + resize.
+function resizeActiveGraphs() {
+  ["ask", "full"].forEach((name) => {
+    const g = graphByName(name);
+    const cont = canvasByName(name);
+    if (g && cont && cont.clientWidth) {
+      g.width(cont.clientWidth).height(cont.clientHeight);
+      setTimeout(() => g.zoomToFit(400, 40), 60);
+    }
+  });
+}
+
 // ---- wire up --------------------------------------------------------------
 window.addEventListener("DOMContentLoaded", () => {
   initTabs();
@@ -272,4 +338,12 @@ window.addEventListener("DOMContentLoaded", () => {
   $("syncBtn").onclick = doSync;
   $("verifyBtn").onclick = doVerify;
   $("forgetBtn").onclick = doForget;
+
+  // Graph zoom / fit / fullscreen controls (delegated).
+  document.querySelectorAll(".gbtn").forEach((b) =>
+    b.addEventListener("click", () => graphAction(b.dataset.g, b.dataset.act))
+  );
+  document.addEventListener("fullscreenchange", resizeActiveGraphs);
+  document.addEventListener("webkitfullscreenchange", resizeActiveGraphs);
+  window.addEventListener("resize", resizeActiveGraphs);
 });

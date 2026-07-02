@@ -68,6 +68,8 @@
             <span class="muted" id="answerQuestion"></span>
           </div>
           <p class="answer-text" id="answerText"></p>
+          <div class="seeds" id="answerSeeds"></div>
+          <div class="facts-head" id="factsHead"></div>
           <div class="facts" id="answerFacts"></div>
         </div>
         <div class="subgraph-card">
@@ -75,7 +77,15 @@
             <span>Traversal path</span>
             <span class="muted small" id="subgraphMeta"></span>
           </div>
-          <div id="subgraph" class="graph-canvas small"></div>
+          <div class="graph-wrap" id="subgraphWrap">
+            <div id="subgraph" class="graph-canvas small"></div>
+            <div class="graph-controls">
+              <button class="gbtn" data-g="ask" data-act="in" title="Zoom in" aria-label="Zoom in">+</button>
+              <button class="gbtn" data-g="ask" data-act="out" title="Zoom out" aria-label="Zoom out">&minus;</button>
+              <button class="gbtn gbtn-wide" data-g="ask" data-act="fit" title="Fit to view">Fit</button>
+              <button class="gbtn gbtn-wide" data-g="ask" data-act="full" title="Fullscreen">&#9974; Full</button>
+            </div>
+          </div>
           <div class="legend" id="legendAsk"></div>
         </div>
       </div>
@@ -89,7 +99,15 @@
         <div class="toolbar-spacer"></div>
         <label class="check"><input type="checkbox" id="showDeleted" /> show tombstoned</label>
       </div>
-      <div id="fullGraph" class="graph-canvas large"></div>
+      <div class="graph-wrap" id="fullGraphWrap">
+        <div id="fullGraph" class="graph-canvas large"></div>
+        <div class="graph-controls">
+          <button class="gbtn" data-g="full" data-act="in" title="Zoom in" aria-label="Zoom in">+</button>
+          <button class="gbtn" data-g="full" data-act="out" title="Zoom out" aria-label="Zoom out">&minus;</button>
+          <button class="gbtn gbtn-wide" data-g="full" data-act="fit" title="Fit to view">Fit</button>
+          <button class="gbtn gbtn-wide" data-g="full" data-act="full" title="Fullscreen">&#9974; Full</button>
+        </div>
+      </div>
       <div class="legend" id="legendFull"></div>
     </section>
 
