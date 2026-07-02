@@ -157,6 +157,19 @@ h1, h2, h3 { margin: 0 0 0.4em; font-weight: 600; }
 }
 .answer-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
 .answer-head .muted { flex: 1; min-width: 0; }
+
+/* Report layout ----------------------------------------------------------*/
+.report-header { border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 16px; }
+.report-title { font-size: 20px; margin: 8px 0 4px; }
+.report-sub { color: var(--muted); font-size: 13px; margin: 0; }
+.report-section { margin-bottom: 18px; }
+.report-section:last-child { margin-bottom: 0; }
+.report-h {
+  font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.6px; margin: 0 0 4px; padding-bottom: 6px; border-bottom: 1px solid var(--border-muted);
+}
+.report-desc { color: var(--muted); font-size: 12.5px; margin: 0 0 10px; }
+.report-question { font-size: 15px; font-weight: 500; color: var(--text); margin: 0; }
 .answer-text { font-size: 16px; line-height: 1.55; }
 .facts { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .facts-head { margin-top: 16px; }
@@ -210,8 +223,9 @@ h1, h2, h3 { margin: 0 0 0.4em; font-weight: 600; }
 
 /* Graph wrapper + overlay controls + fullscreen --------------------------*/
 .graph-wrap { position: relative; }
+.graph-wrap canvas { position: relative; z-index: 1; }
 .graph-controls {
-  position: absolute; top: 10px; right: 10px; display: flex; gap: 6px;
+  position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; z-index: 20;
   background: rgba(13,17,23,0.72); backdrop-filter: blur(6px);
   border: 1px solid var(--border); border-radius: 8px; padding: 5px;
 }

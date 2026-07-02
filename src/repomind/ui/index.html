@@ -63,14 +63,34 @@
 
       <div id="askResult" class="result hidden">
         <div class="answer-card">
-          <div class="answer-head">
-            <span class="badge" id="answerBadge">Answer</span>
-            <span class="muted" id="answerQuestion"></span>
+          <div class="report-header">
+            <span class="badge" id="answerBadge">Report</span>
+            <h2 class="report-title">Answer</h2>
+            <p class="report-sub">Generated from multi-hop traversal of the knowledge graph.</p>
           </div>
-          <p class="answer-text" id="answerText"></p>
-          <div class="seeds" id="answerSeeds"></div>
-          <div class="facts-head" id="factsHead"></div>
-          <div class="facts" id="answerFacts"></div>
+
+          <section class="report-section">
+            <h3 class="report-h">Question</h3>
+            <p class="report-question" id="answerQuestion"></p>
+          </section>
+
+          <section class="report-section">
+            <h3 class="report-h">Answer</h3>
+            <p class="report-desc">The most relevant fact found by walking typed relationships in the graph.</p>
+            <p class="answer-text" id="answerText"></p>
+          </section>
+
+          <section class="report-section" id="seedsSection">
+            <h3 class="report-h">Sources</h3>
+            <p class="report-desc">The graph nodes this answer is grounded on.</p>
+            <div class="seeds" id="answerSeeds"></div>
+          </section>
+
+          <section class="report-section" id="factsSection">
+            <h3 class="report-h" id="factsHead">Traversal</h3>
+            <p class="report-desc">Each step is one hop the query engine followed to reach the answer.</p>
+            <div class="facts" id="answerFacts"></div>
+          </section>
         </div>
         <div class="subgraph-card">
           <div class="card-head">

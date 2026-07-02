@@ -155,12 +155,17 @@ async function ask() {
     $("question").value = "";  // clear the box after a successful ask
     $("askResult").classList.remove("hidden");
     $("answerQuestion").textContent = r.question;
-    $("answerText").innerHTML = formatAnswer(r.answer || "");
-    renderSeeds(r.seeds || []);
+    $("answerText").innerHTML = formatAnswer(r.answer || "No answer found.");
+
+    const seeds = r.seeds || [];
+    renderSeeds(seeds);
+    $("seedsSection").classList.toggle("hidden", seeds.length === 0);
+
     const facts = r.facts || [];
-    $("factsHead").innerHTML = facts.length
-      ? `<span class="facts-title">Traversal &mdash; ${facts.length} hop${facts.length > 1 ? "s" : ""}</span>`
-      : "";
+    $("factsHead").textContent = facts.length
+      ? `Traversal \u2014 ${facts.length} hop${facts.length > 1 ? "s" : ""}`
+      : "Traversal";
+    $("factsSection").classList.toggle("hidden", facts.length === 0);
     $("answerFacts").innerHTML = facts
       .map((f, i) => `<div class="fact"><span class="fact-num">${i + 1}</span><span class="fact-text">${formatAnswer(f)}</span></div>`)
       .join("");
@@ -270,16 +275,14 @@ function formatAnswer(text) {
 // Render the seed nodes the answer is grounded on as colored chips.
 function renderSeeds(seeds) {
   const el = $("answerSeeds");
-  if (!seeds.length) { el.innerHTML = ""; return; }
-  el.innerHTML =
-    '<span class="seeds-label">Grounded on</span>' +
-    seeds
-      .slice(0, 8)
-      .map((s) => {
-        const title = (s.title || s.id || "").slice(0, 42);
-        return `<span class="seed-chip" title="${escapeHtml(s.id || "")}"><span class="dot" style="background:${colorFor(s.type)}"></span>${escapeHtml(title)}</span>`;
-      })
-      .join("");
+  if (!seeds.length) { el.innerHTML = '<span class="muted small">None</span>'; return; }
+  el.innerHTML = seeds
+    .slice(0, 8)
+    .map((s) => {
+      const title = (s.title || s.id || "").slice(0, 42);
+      return `<span class="seed-chip" title="${escapeHtml(s.id || "")}"><span class="dot" style="background:${colorFor(s.type)}"></span>${escapeHtml(title)}</span>`;
+    })
+    .join("");
 }
 
 // ---- graph controls (zoom / fit / fullscreen) -----------------------------
@@ -288,12 +291,17 @@ const wrapByName = (name) => (name === "ask" ? $("subgraphWrap") : $("fullGraphW
 const canvasByName = (name) => (name === "ask" ? $("subgraph") : $("fullGraph"));
 
 function graphAction(name, act) {
+  if (act === "full") { toggleFullscreen(name); return; }
   const g = graphByName(name);
   if (!g) { toast("Load a graph first", "err"); return; }
-  if (act === "in") g.zoom(g.zoom() * 1.4, 250);
-  else if (act === "out") g.zoom(g.zoom() / 1.4, 250);
-  else if (act === "fit") g.zoomToFit(400, 40);
-  else if (act === "full") toggleFullscreen(name);
+  try {
+    const z = g.zoom() || 1;
+    if (act === "in") g.zoom(z * 1.4, 250);
+    else if (act === "out") g.zoom(z / 1.4, 250);
+    else if (act === "fit") g.zoomToFit(400, 40);
+  } catch (e) {
+    toast("Graph control failed", "err");
+  }
 }
 
 function toggleFullscreen(name) {
