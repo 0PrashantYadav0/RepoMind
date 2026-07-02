@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Test / tooling
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# RepoMind runtime artifacts
+*.sqlite3
+graph.json
+config.yaml
+.demo/
+
+# Secrets / env (never commit)
+.env
+*.pem
+
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/

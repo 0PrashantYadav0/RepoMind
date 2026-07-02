@@ -1,0 +1,58 @@
+# RepoMind demo config: ingest the real Cognee repo (code + PRs + issues) into
+# COGNEE CLOUD -- the hosted, managed backend. Nothing to self-host: no Ollama,
+# no local model, no graph DB. You just drop two values in .env:
+#   COGNEE_API_KEY      -- your Cognee Cloud key
+#   COGNEE_SERVICE_URL  -- your Cognee Cloud base URL (e.g. https://api.cognee.ai)
+# and (optional) GITHUB_TOKEN to pull PRs/issues/reviewers.
+
+repo:
+  name: "topoteretes/cognee"          # the open-source Cognee repo (owner/name)
+  local_path: ".demo/cognee"          # local clone (created by scripts/demo_cognee.sh)
+  github_token_env: "GITHUB_TOKEN"    # your PAT -> ingests PRs, issues, reviewers
+
+memory:
+  backend: "cognee_cloud"             # hosted Cognee -- no self-deploy
+  dataset: "repomind_cognee"
+  persist_path: "graph.json"          # structural graph survives between processes
+  cognee_api_key_env: "COGNEE_API_KEY"
+  service_url_env: "COGNEE_SERVICE_URL"
+  # service_url: "https://api.cognee.ai"   # or set it here instead of the env var
+  cloud_search_type: "CHUNKS"         # seed retrieval type for recall
+
+state:
+  db_path: "repomind_state.sqlite3"
+
+ingest:
+  verify_after: true
+  batch_size: 50
+  max_retries: 5
+  retry_backoff: "exponential"
+  max_commits: 400
+
+webhook:
+  enabled: true
+  secret_env: "REPOMIND_WEBHOOK_SECRET"
+  require_signature: true
+
+api:
+  token_env: "REPOMIND_API_TOKEN"
+  keys:
+    - name: ops
+      token_env: RM_ADMIN_KEY
+      scopes: [admin]
+    - name: dashboard
+      token_env: RM_READ_KEY
+      scopes: [read]
+  rate_limit: 0
+  rate_window: "1m"
+
+polling:
+  enabled: false
+  interval: "15m"
+  scope: ["prs", "issues", "commits"]
+
+sync:
+  default_mode: "incremental"
+
+verification:
+  schedule: "0 3 * * *"
