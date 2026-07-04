@@ -84,11 +84,25 @@ uv pip install -e ".[dev,cognee]" # add the real Cognee Cloud backend
 ```bash
 cp config.example.yaml config.yaml
 # edit repo.name and repo.local_path
-export GITHUB_TOKEN=ghp_...                 # for PR/issue ingestion
-export REPOMIND_WEBHOOK_SECRET=...          # to verify webhooks
-# for the real backend:
-export COGNEE_API_KEY=...                   # and set memory.backend: cognee
 ```
+
+Secrets are read from the environment and auto-loaded from a local `.env` file
+(gitignored). Real environment variables always win, so CI/containers stay in
+control.
+
+```bash
+# .env  (or export in your shell)
+GITHUB_TOKEN=ghp_...                 # for PR/issue ingestion
+REPOMIND_WEBHOOK_SECRET=...          # to verify webhooks
+REPOMIND_API_TOKEN=...               # admin API key to run the server
+# hosted AI backend (optional):
+COGNEE_API_KEY=...                   # + set memory.backend: cognee_cloud
+COGNEE_SERVICE_URL=https://<you>.cognee.ai
+```
+
+Large repo? Bound the ingest with `ingest.max_commits` / `max_prs` /
+`max_issues` (0 = unlimited) to keep demos fast and stay within GitHub rate
+limits.
 
 ## Use
 
@@ -142,11 +156,14 @@ uv run repomind --config config.yaml serve --port 8000
 ```
 
 Paste an API key (top-right) and click **Connect**. Tabs: **Ask** (question ->
-answer + traversal facts + a live force-graph of the path), **Graph Explorer**
+a structured answer report with entity highlighting, grounded-on sources, and a
+numbered traversal, plus a live force-graph of the path), **Graph Explorer**
 (the full graph, colored by node type, with a show-tombstoned toggle), **Ingest**
-(post a chat message, write scope), **Admin** (sync/verify + forget). The key is
+(post a chat message, write scope), **Admin** (sync/verify + forget). Every graph
+has zoom (`+` / `-`), **Fit**, and **fullscreen** controls. The key is
 stored only in the browser's localStorage and sent as `X-API-Key`; the static
-assets are unauthenticated but every data call requires a valid key.
+assets are unauthenticated (and served `no-cache`) but every data call requires a
+valid key.
 
 ### Security
 
@@ -184,13 +201,22 @@ throwaway git repo and fake GitHub objects -- no network or API keys required.
 uv run pytest
 ```
 
-## Real backend (Cognee Cloud)
+## Real backend: Cognee
 
-Set `memory.backend: cognee` and `COGNEE_API_KEY`. The `CogneeMemoryStore`
-keeps the exact typed graph for traversal/path-highlighting and pushes node text
-into Cognee via `remember()`/`cognify` for hybrid recall, with `improve()` for
-enrichment and `forget()` for surgical erasure. The structural graph is identical
-to the offline backend, so behavior and tests transfer directly.
+Two AI-backed options, both keep the exact typed graph locally for
+traversal/path-highlighting and delegate hybrid vector+graph recall to Cognee:
+
+- **`memory.backend: cognee_cloud`** (hosted, zero self-hosting) -- set
+  `COGNEE_API_KEY` and `COGNEE_SERVICE_URL`. Nothing to install or deploy
+  beyond `httpx`: no local model, no Ollama, no graph DB. Node text is pushed to
+  your hosted instance (`add` + `cognify`) and questions run against it
+  (`search`); everything else runs server-side.
+- **`memory.backend: cognee`** (in-process SDK) -- runs Cognee locally with a
+  local LLM + embeddings (Ollama) and an embedded kuzu graph. Fully offline but
+  heavier. See `docs/LOCAL_COGNEE.md`.
+
+Either way the structural graph is identical to the offline backend, so behavior
+and tests transfer directly.
 
 ## Phase 2: live connectors (implemented)
 

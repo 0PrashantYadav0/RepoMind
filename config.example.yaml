@@ -7,10 +7,19 @@ repo:
   github_token_env: "GITHUB_TOKEN"  # env var holding the PAT
 
 memory:
-  backend: "memory"             # "memory" (default, offline) or "cognee"
+  # "memory"        - default, offline, deterministic (no AI deps, no network)
+  # "cognee"        - in-process Cognee SDK (local LLM/embeddings via Ollama)
+  # "cognee_cloud"  - hosted Cognee (NOTHING to self-host: just a key + URL)
+  backend: "memory"
   persist_path: "graph.json"    # JSON snapshot of the structural graph
   cognee_api_key_env: "COGNEE_API_KEY"
   dataset: "repomind"
+  # --- Cognee Cloud (backend: "cognee_cloud") -- hosted, managed. Only these
+  #     two values are needed; everything runs server-side. The URL is not a
+  #     secret (set here or via COGNEE_SERVICE_URL); the key comes from env.
+  service_url: ""               # e.g. "https://<your-instance>.cognee.ai"
+  service_url_env: "COGNEE_SERVICE_URL"
+  cloud_search_type: "CHUNKS"  # seed-retrieval type for cloud recall
   # --- Local / self-hosted Cognee (Ollama + embedded kuzu). Used when
   #     backend: "cognee" and these are set. Leave empty for Cognee Cloud.
   #     (persist_path above is required so the structural graph survives between
@@ -34,6 +43,11 @@ ingest:
   batch_size: 50
   max_retries: 5
   retry_backoff: "exponential"
+  # Bounding knobs for large repos (0 = unlimited). Handy for demos and to stay
+  # within GitHub API rate limits; raise/remove for a complete ingest.
+  max_commits: 0                # cap git history commits walked per backfill/sync
+  max_prs: 0                    # cap pull requests fetched from GitHub
+  max_issues: 0                 # cap issues fetched from GitHub
 
 webhook:
   enabled: true                 # primary real-time path

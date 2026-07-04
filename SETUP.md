@@ -180,6 +180,42 @@ curl -H "X-API-Key: $RM_ADMIN_KEY" -H 'Content-Type: application/json' \
 
 ---
 
+## 9a. (Optional) Hosted AI with Cognee Cloud -- zero self-hosting
+
+The easiest AI backend: no local model, no Ollama, no graph DB. Just point
+RepoMind at your hosted Cognee instance.
+
+1. Add two values to `.env` (auto-loaded):
+
+   ```bash
+   COGNEE_API_KEY=your_cognee_cloud_key
+   COGNEE_SERVICE_URL=https://<your-instance>.cognee.ai
+   ```
+
+2. In `config.yaml`, set:
+
+   ```yaml
+   memory:
+     backend: "cognee_cloud"
+     dataset: "repomind"
+     persist_path: "graph.json"
+     cloud_search_type: "CHUNKS"
+   ```
+
+3. Run as usual -- ingestion pushes node text to your instance (`add` +
+   `cognify`) and `ask` queries it (`search`):
+
+   ```bash
+   uv run repomind --config config.yaml backfill
+   uv run repomind --config config.yaml ask "Who owns the auth module and why?"
+   uv run repomind --config config.yaml serve --port 8000
+   ```
+
+Nothing to install beyond the core (`httpx`). The structural graph stays local
+so traversal/path-highlighting are exact and reproducible.
+
+---
+
 ## 9. (Optional) Fully-local AI with Cognee + Ollama
 
 For real hybrid graph+vector recall, fully offline.
