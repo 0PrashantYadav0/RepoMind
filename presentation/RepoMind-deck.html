@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RepoMind — Presentation</title>
+<style>
+  :root {
+    --bg:#0d1117; --elev:#161b22; --elev2:#1c2128; --border:#30363d; --border-muted:#21262d;
+    --text:#e6edf3; --muted:#7d8590; --accent:#2f81f7; --green:#3fb950; --purple:#a371f7;
+    --orange:#db6d28; --pink:#f778ba; --teal:#56d364;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(47,129,247,0.12), transparent 60%),
+      radial-gradient(900px 500px at 0% 0%, rgba(163,113,247,0.10), transparent 55%),
+      var(--bg);
+    color:var(--text); font-family:var(--sans); overflow:hidden;
+  }
+  .stage { height:100vh; width:100vw; display:flex; align-items:center; justify-content:center; }
+  .slide {
+    display:none; width:min(1120px,92vw); height:min(640px,88vh);
+    padding:56px 64px; background:var(--elev); border:1px solid var(--border);
+    border-radius:18px; box-shadow:0 24px 60px rgba(1,4,9,0.6); position:relative;
+    flex-direction:column; animation:fade .35s ease;
+  }
+  .slide.active { display:flex; }
+  @keyframes fade { from { opacity:0; transform:translateY(10px);} to { opacity:1; transform:none; } }
+
+  .eyebrow { font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+  h1 { font-size:56px; line-height:1.05; font-weight:800; letter-spacing:-1px;
+       background:linear-gradient(90deg,#fff,#9da7b3); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  h2 { font-size:38px; line-height:1.12; font-weight:700; letter-spacing:-0.5px; margin-bottom:8px; }
+  .lead { font-size:21px; line-height:1.5; color:#c9d1d9; max-width:44ch; }
+  .sub { font-size:18px; color:var(--muted); margin-top:16px; }
+  .big-quote { font-size:30px; line-height:1.35; font-weight:600; max-width:24ch; }
+  .accent { color:var(--accent); } .green{color:var(--green);} .purple{color:var(--purple);}
+  .orange{color:var(--orange);} .pink{color:var(--pink);} .teal{color:var(--teal);}
+  code { font-family:var(--mono); background:var(--elev2); padding:2px 7px; border-radius:6px; font-size:0.85em; }
+
+  /* Title slide */
+  .title-slide { align-items:flex-start; justify-content:center; }
+  .brand-mark { width:64px; height:64px; border-radius:16px; margin-bottom:28px;
+    background:linear-gradient(135deg,var(--purple),var(--accent)); position:relative; box-shadow:0 8px 24px rgba(47,129,247,0.4); }
+  .brand-mark::after { content:""; position:absolute; inset:16px; border-radius:50%;
+    border:3px solid rgba(255,255,255,0.9); border-right-color:transparent; border-bottom-color:transparent; transform:rotate(45deg); }
+
+  /* Section divider */
+  .section-slide { align-items:flex-start; justify-content:center; }
+  .section-num { font-size:120px; font-weight:800; color:var(--border); line-height:1; }
+  .section-slide h2 { font-size:52px; margin-top:8px; }
+
+  /* Metric grid */
+  .grid { display:grid; gap:18px; margin-top:auto; margin-bottom:auto; }
+  .grid.g4 { grid-template-columns:repeat(4,1fr); }
+  .grid.g3 { grid-template-columns:repeat(3,1fr); }
+  .grid.g2 { grid-template-columns:repeat(2,1fr); }
+  .metric { background:var(--elev2); border:1px solid var(--border); border-radius:14px; padding:22px; }
+  .metric .num { font-size:44px; font-weight:800; letter-spacing:-1px; }
+  .metric .lbl { font-size:14px; color:var(--muted); margin-top:6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .card { background:var(--elev2); border:1px solid var(--border); border-radius:14px; padding:22px; }
+  .card h3 { font-size:20px; margin-bottom:8px; } .card p { color:var(--muted); font-size:15px; line-height:1.5; }
+  .card .tag { font-family:var(--mono); font-size:13px; }
+
+  ul.bullets { list-style:none; margin-top:26px; display:flex; flex-direction:column; gap:16px; }
+  ul.bullets li { font-size:20px; line-height:1.4; padding-left:34px; position:relative; }
+  ul.bullets li::before { content:"→"; position:absolute; left:0; color:var(--accent); font-weight:800; }
+  ul.bullets li b { font-weight:700; }
+
+  .chain { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:28px; font-family:var(--mono); font-size:17px; }
+  .pill { padding:6px 14px; border-radius:999px; font-weight:700; font-size:15px; border:1px solid; }
+  .pill.commit{color:var(--purple);border-color:var(--purple);background:rgba(163,113,247,.14);}
+  .pill.file{color:var(--green);border-color:var(--green);background:rgba(63,185,80,.14);}
+  .pill.pr{color:var(--accent);border-color:var(--accent);background:rgba(47,129,247,.14);}
+  .pill.issue{color:var(--orange);border-color:var(--orange);background:rgba(219,109,40,.14);}
+  .pill.person{color:var(--pink);border-color:var(--pink);background:rgba(247,120,186,.14);}
+  .arrow { color:var(--muted); }
+
+  .steps { counter-reset:step; display:flex; flex-direction:column; gap:14px; margin-top:24px; }
+  .steps li { list-style:none; position:relative; padding-left:46px; font-size:19px; line-height:1.4; }
+  .steps li::before { counter-increment:step; content:counter(step); position:absolute; left:0; top:-2px;
+    width:30px; height:30px; border-radius:50%; background:rgba(47,129,247,.16); color:var(--accent);
+    border:1px solid rgba(47,129,247,.45); font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:auto; margin-bottom:auto; }
+
+  /* footer / chrome */
+  .footer { position:absolute; left:64px; right:64px; bottom:24px; display:flex; align-items:center; justify-content:space-between; color:var(--muted); font-size:13px; }
+  .footer .name { display:flex; align-items:center; gap:8px; font-weight:600; color:var(--text); }
+  .dotmark { width:16px; height:16px; border-radius:5px; background:linear-gradient(135deg,var(--purple),var(--accent)); }
+  .progress { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--purple),var(--accent)); z-index:10; transition:width .3s ease; }
+  .nav { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:10; }
+  .nav button { background:var(--elev2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-size:15px; cursor:pointer; }
+  .nav button:hover { border-color:var(--accent); }
+  .counter { position:fixed; bottom:26px; right:22px; color:var(--muted); font-family:var(--mono); font-size:13px; z-index:10; }
+  .hint { position:fixed; top:14px; right:16px; color:var(--muted); font-size:12px; z-index:10; }
+  .title-badge { display:inline-block; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    color:var(--accent); background:rgba(47,129,247,.14); border:1px solid rgba(47,129,247,.4); padding:4px 12px; border-radius:999px; }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="hint">← → to navigate · F for fullscreen</div>
+
+<div class="stage">
+
+  <!-- 1. TITLE -->
+  <section class="slide title-slide active">
+    <div class="brand-mark"></div>
+    <h1>RepoMind</h1>
+    <p class="lead" style="margin-top:18px;">Give your repository a brain.</p>
+    <p class="sub">Ask your codebase anything — the answer is the path.</p>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Powered by Cognee</span></div>
+  </section>
+
+  <!-- 2. SECTION: ABOUT -->
+  <section class="slide section-slide">
+    <div class="section-num">01</div>
+    <h2>About the Project</h2>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>About</span></div>
+  </section>
+
+  <!-- 3. PROBLEM / WHAT IT IS -->
+  <section class="slide">
+    <div class="eyebrow">The problem</div>
+    <h2>Your repo knows.<br>You can't ask it.</h2>
+    <p class="lead" style="margin-top:20px;">
+      <em>"Why was auth built this way, and who decided it?"</em> The answer is buried across
+      commits, closed PRs and stale issues — and keyword search can't connect the dots.
+    </p>
+    <p class="sub"><b class="accent">RepoMind</b> turns commits, PRs, issues, people &amp; chat into one
+      <b>typed knowledge graph</b>, then answers by <b>multi-hop traversal</b> — so every answer comes with the path that proves it.</p>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>About · What it is</span></div>
+  </section>
+
+  <!-- 4. PROOF METRICS -->
+  <section class="slide">
+    <div class="eyebrow">Proof — the entire Cognee repo, mapped</div>
+    <h2>Real repo. Real scale.</h2>
+    <div class="grid g4">
+      <div class="metric"><div class="num purple">18,890</div><div class="lbl">Graph nodes</div></div>
+      <div class="metric"><div class="num">8,426</div><div class="lbl">Commits</div></div>
+      <div class="metric"><div class="num accent">2,802</div><div class="lbl">Pull requests</div></div>
+      <div class="metric"><div class="num orange">771</div><div class="lbl">Issues</div></div>
+    </div>
+    <p class="sub">Plus <b>936 people</b> and <b>4,815 files</b> — <b>128,899 typed edges</b>, ingested end to end.</p>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>About · Impact</span></div>
+  </section>
+
+  <!-- 5. SECTION: TECH -->
+  <section class="slide section-slide">
+    <div class="section-num">02</div>
+    <h2>Tech Stack &amp; Architecture</h2>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Tech</span></div>
+  </section>
+
+  <!-- 6. TECH STACK -->
+  <section class="slide">
+    <div class="eyebrow">The stack — deliberately lean</div>
+    <h2>Built on boring, solid tools</h2>
+    <ul class="bullets">
+      <li><b>Python 3.11 · FastAPI · Uvicorn</b> — API + webhook server</li>
+      <li><b>Pydantic · GitPython · PyGithub</b> — typed models &amp; sources</li>
+      <li><b>Cognee</b> — hybrid graph + vector memory (local or cloud)</li>
+      <li><b>Vanilla JS + force-graph</b> — GitHub-themed web UI</li>
+      <li><b>pytest · ruff · uv</b> — 109 tests, all offline</li>
+    </ul>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Tech · Stack</span></div>
+  </section>
+
+  <!-- 7. ARCHITECTURE -->
+  <section class="slide">
+    <div class="eyebrow">Architecture</div>
+    <h2>One idempotent pipeline, three layers</h2>
+    <div class="grid g3">
+      <div class="card"><h3 class="green">Sources</h3><p>Git, GitHub, Slack, Discord — all behind <b>one Source interface</b>.</p></div>
+      <div class="card"><h3 class="accent">Ingestor</h3><p>One path: <b>upsert · resolve refs · park/retry · tombstone</b>. Every trigger funnels through it.</p></div>
+      <div class="card"><h3 class="purple">Graph Store</h3><p>Exact typed KB kept local + <b>Cognee</b> hybrid recall (memory / local / cloud).</p></div>
+    </div>
+    <div class="chain">
+      <span class="pill file">File</span><span class="arrow">→</span>
+      <span class="pill commit">Commit</span><span class="arrow">→</span>
+      <span class="pill pr">PullRequest</span><span class="arrow">→</span>
+      <span class="pill person">Reviewer</span><span class="arrow">→</span>
+      <span class="pill issue">Issue</span>
+    </div>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Tech · Architecture</span></div>
+  </section>
+
+  <!-- 8. CORRECTNESS -->
+  <section class="slide">
+    <div class="eyebrow">Correctness-first by design</div>
+    <h2>Safe to re-run, always</h2>
+    <div class="grid g2">
+      <div class="card"><h3>Idempotent</h3><p>Stable-ID upserts — reprocessing never creates duplicates.</p></div>
+      <div class="card"><h3>No silent loss</h3><p>Retries with backoff + a dead-letter queue you can replay.</p></div>
+      <div class="card"><h3>Deterministic refs</h3><p>Numeric refs are never guessed — parked until the target arrives.</p></div>
+      <div class="card"><h3>Tombstones</h3><p>Deletions preserve history; <code>verify</code> reconciles the graph.</p></div>
+    </div>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Tech · Correctness</span></div>
+  </section>
+
+  <!-- 9. BACKENDS -->
+  <section class="slide">
+    <div class="eyebrow">Pluggable memory — swap in one line</div>
+    <h2>Pick your backend</h2>
+    <div class="grid g3">
+      <div class="card"><h3 class="tag">memory</h3><p>Offline, deterministic, <b>zero AI deps</b> — ideal for CI.</p></div>
+      <div class="card"><h3 class="tag">cognee</h3><p>Local AI: Ollama + embedded kuzu graph, fully offline.</p></div>
+      <div class="card"><h3 class="tag">cognee_cloud</h3><p>Hosted AI — just a <b>key + URL</b>, nothing to self-host.</p></div>
+    </div>
+    <p class="sub">Same typed structural graph across all three, so behavior and tests transfer directly.</p>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Tech · Backends</span></div>
+  </section>
+
+  <!-- 10. SECTION: DEMO -->
+  <section class="slide section-slide">
+    <div class="section-num">03</div>
+    <h2>Demo</h2>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Demo</span></div>
+  </section>
+
+  <!-- 11. DEMO -->
+  <section class="slide">
+    <div class="eyebrow">Live in the browser</div>
+    <h2>Ask → Answer → Traversal graph</h2>
+    <ol class="steps">
+      <li>Paste the API key and <b>Connect</b>.</li>
+      <li>Ask: <em>"who reviewed pull requests about the graph store?"</em></li>
+      <li>Get a <b>structured, cited report</b> — answer, sources, numbered traversal.</li>
+      <li><b>Zoom &amp; fullscreen</b> the live 18,890-node graph.</li>
+    </ol>
+    <p class="sub">Every answer is explainable; every endpoint is secured with scoped API keys.</p>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Demo</span></div>
+  </section>
+
+  <!-- 12. SECTION: LEARNING -->
+  <section class="slide section-slide">
+    <div class="section-num">04</div>
+    <h2>Learning &amp; Growth</h2>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Learning</span></div>
+  </section>
+
+  <!-- 13. LEARNINGS -->
+  <section class="slide">
+    <div class="eyebrow">What we learned</div>
+    <h2>Correctness first, then scale</h2>
+    <ul class="bullets">
+      <li><b>Graph traversal beats vector RAG</b> for explainable, cited answers</li>
+      <li><b>Idempotency + tombstones</b> make ingestion safe to re-run anytime</li>
+      <li><b>Real repos are big</b> — bounded ingestion &amp; rate limits matter</li>
+      <li><b>One pluggable memory interface</b> = swap local ↔ cloud in a line</li>
+    </ul>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Learning &amp; Growth</span></div>
+  </section>
+
+  <!-- 14. THANK YOU -->
+  <section class="slide title-slide">
+    <div class="brand-mark"></div>
+    <h1>Thank you</h1>
+    <p class="lead" style="margin-top:18px;">RepoMind — give your repository a brain.</p>
+    <p class="sub">Typed knowledge graph · explainable multi-hop answers · correctness-first · pluggable Cognee memory.</p>
+    <div class="footer"><span class="name"><span class="dotmark"></span>RepoMind</span><span>Questions?</span></div>
+  </section>
+
+</div>
+
+<div class="counter" id="counter">1 / 14</div>
+<div class="nav">
+  <button id="prev">← Prev</button>
+  <button id="full"> Fullscreen</button>
+  <button id="next">Next →</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  let i = 0;
+  const counter = document.getElementById("counter");
+  const progress = document.getElementById("progress");
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle("active", k === i));
+    counter.textContent = (i + 1) + " / " + slides.length;
+    progress.style.width = ((i + 1) / slides.length * 100) + "%";
+  }
+  function next() { show(i + 1); }
+  function prev() { show(i - 1); }
+  function toggleFull() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+  document.getElementById("next").onclick = next;
+  document.getElementById("prev").onclick = prev;
+  document.getElementById("full").onclick = toggleFull;
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); next(); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); prev(); }
+    else if (e.key.toLowerCase() === "f") toggleFull();
+    else if (e.key === "Home") show(0);
+    else if (e.key === "End") show(slides.length - 1);
+  });
+  show(0);
+</script>
+</body>
+</html>
