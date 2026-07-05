@@ -1,47 +1,72 @@
-# RepoMind — Presentation
+# RepoMind — YouTube Demo Video Script (max 3:00)
 
-**Give your repository a brain.** Ask your codebase anything — the answer is the path.
+Target: **under 3 minutes**. ~430 words (~150 wpm). Record at 1080p, big fonts.
+Have the server running and the Cognee graph already ingested so the demo is instant.
 
-- **Purpose:** submission deck + YouTube demo (max 3 min)
-- **Covers the rubric:** About the project · Tech stack & architecture · Demo · Learning & growth
-- **Deliverables in this folder:**
-  - `RepoMind-deck.html` — self-contained slide deck (open in any browser; arrow keys + `F` for fullscreen). Use this to present/record.
-  - `RepoMind.slides.json` — slide source for the slide-deck tool (Download PPTX).
-  - `RepoMind-video-script.md` — timed narration, under 3:00.
-  - `RepoMind.md` — this outline + demo runbook.
+> Covers: About the project · Tech stack & architecture · Demo · Learning & growth.
+> Slides: open `RepoMind-deck.html` fullscreen (press F) and advance with arrow keys.
 
 ---
 
-## Deck outline (14 slides in the HTML deck)
+## 0:00 - 0:10 · Cold open (title slide)
+> "This is RepoMind — it gives your repository a brain. Ask your codebase
+> anything in plain English, and the answer comes with the exact path that
+> proves it."
 
-1. **Title** — RepoMind: give your repository a brain
-2. *Section — About the Project*
-3. **Your Repo Knows. You Can't Ask It.** — what it is + the problem
-4. **Real repo. Real scale.** — 18,890 nodes / 8,426 commits / 2,802 PRs / 771 issues
-5. *Section — Tech Stack & Architecture*
-6. **The Stack** — Python, FastAPI, Pydantic, GitPython/PyGithub, Cognee, force-graph UI, pytest/ruff/uv
-7. **One Idempotent Pipeline, Three Layers** — Sources -> Ingestor -> Graph Store
-8. **Correctness-First By Design** — idempotent, no silent loss, deterministic refs, tombstones
-9. **Pick Your Backend** — memory / cognee / cognee_cloud
-10. *Section — Demo*
-11. **Ask -> Answer -> Traversal Graph** — demo steps
-12. *Section — Learning & Growth*
-13. **What We Learned** — traversal > vector RAG, idempotency, scaling, pluggable memory
-14. **Thank You**
+## 0:10 - 0:50 · About the project (~40s)
+> "Every repo hides its real story in commits, closed PRs and stale issues.
+> Ask why the auth layer was built this way and who decided it — and normal
+> search just returns similar-looking text and hopes.
+>
+> RepoMind is different. It turns commits, pull requests, issues, people and
+> chat into one typed knowledge graph, then answers by walking the relationships
+> — multi-hop, and fully explainable.
+>
+> To prove it, we pointed it at the entire Cognee open-source repo: over
+> eighteen thousand nodes — eight thousand commits, twenty-eight hundred pull
+> requests, and every issue — all connected."
+
+## 0:50 - 1:30 · Tech stack & architecture (~40s)
+> "The stack is deliberately lean: Python and FastAPI for the API and webhook
+> server, GitPython and PyGithub for sources, a vanilla-JS force-graph UI, and
+> Cognee for hybrid graph-plus-vector memory.
+>
+> The architecture is three layers behind one idempotent pipeline. Sources all
+> speak one interface. Everything funnels through a single ingestor that upserts
+> by stable ID, resolves references, and tombstones deletions — so re-running
+> never duplicates and never silently loses data. Recall is pluggable:
+> in-memory, local AI, or hosted Cognee Cloud — one config line."
+
+## 1:30 - 2:35 · Demo (~65s)
+> "Here it is live. I paste my API key and connect.
+>
+> On the Ask tab I'll ask: who reviewed pull requests about the graph store?"
+
+*(type it, submit)*
+
+> "Instantly I get a structured report — the answer, the sources it's grounded
+> on, and a numbered traversal showing every hop it took: file, to commit, to
+> pull request, to reviewer. That traversal IS the citation.
+>
+> And it's interactive — here's the live graph of that path. I can zoom, fit,
+> and go fullscreen to explore the whole eighteen-thousand-node brain."
+
+*(click fullscreen, zoom around briefly)*
+
+> "Every answer is explainable, and every endpoint is secured with scoped API keys."
+
+## 2:35 - 3:00 · Learning & growth (~25s)
+> "Building this taught us that graph traversal beats plain vector search when
+> you need answers you can trust — and that scaling to a real six-thousand-commit
+> repo is all about idempotent, bounded ingestion. RepoMind: give your
+> repository a brain. Thanks for watching."
 
 ---
 
-## Demo runbook (keep off-screen)
-
-1. Server: `uv run repomind --config config.yaml serve --port 8000` (already running).
-2. Open `http://127.0.0.1:8000/`, paste the **admin key**, click **Connect**.
-3. **Ask tab:** *"who reviewed pull requests about the graph store"* -> point at the report + numbered traversal + live graph.
-4. **Graph:** click **Full**, zoom around, then wrap.
-5. Close on the **Learning & Growth** slide.
-
----
-
-## Recording the video (under 3:00)
-
-Read from `RepoMind-video-script.md`. Screen-record `RepoMind-deck.html` (fullscreen)
-for the slide portions, and the running RepoMind UI for the demo portion.
+## Recording checklist
+- Server: `uv run repomind --config config.yaml serve --port 8000`
+- Cognee graph already ingested (instant demo).
+- Slides: `RepoMind-deck.html` (fullscreen, arrow keys).
+- Pre-type the demo question; confirm the answer looks good first.
+- Keep the traversal panel + fullscreen graph on screen — that's the money shot.
+- Talk budget: ~2:55. Leave a few seconds of headroom.
